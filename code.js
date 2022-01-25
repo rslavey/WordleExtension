@@ -24,52 +24,53 @@ async function solve(callback) {
             rowTotals.style.cssText = `position:absolute;top:${bc.bottom - 10 - (bc.height / 2)}px;left:${bc.right + 20}px;width: 200px;height: 20px;color: #fff;`;
             document.body.appendChild(rowTotals);
         }
+        processRows();
     });
 }
 
-this.wordle.bundle.GameApp.prototype.evaluateRow = (function () {
-    var cached_function = this.wordle.bundle.GameApp.prototype.evaluateRow;
+function resize() {
+    var rows = document.body.getElementsByTagName('game-app')[0].$board.children;
+    for (var i = 0; i < rows.length; i++) {
+        var valEle = document.getElementById(`row${i}Totals`);
+        var pd = document.body.getElementsByTagName('game-app')[0].$board.children[i];
+        var bc = pd.getBoundingClientRect();
+        valEle.style.cssText = `position:absolute;top:${bc.bottom - 10 - (bc.height / 2)}px;left:${bc.right + 20}px;width: 200px;height: 20px;color: #fff;`;
+    }
+}
 
-    return function () {
-        var result = cached_function.apply(this, arguments);
-        var missingLetters = [];
-        for (const [key, value] of Object.entries(this.letterEvaluations)) {
-            if (value == 'absent') {
-                missingLetters.push(key);
-            }
-        }
-        var aws = [];
-        var exs = [];
-        var awTest = false;
-        var exTest = false;
-        for (var i = 0; i < this.boardState.length; i++) {
-            var evals = this.evaluations[i];
-            if (!evals) {
-                continue;
-            }
+function processRows(reProcess) {
+    var gs = JSON.parse(localStorage.gameState);
+    var bs = gs.boardState;
+    var evals = gs.evaluations;
+
+    var missingLetters = [];
+    
+    var aws = [];
+    var exs = [];
+    var awTest = false;
+    var exTest = false;
+    for (var i = 0; i < bs.length; i++){
+        if (bs[i] != ''){
+            console.log(bs[i]);
+            var ls = [...bs[i]];
             var aw = new Array(5);
             var ex = new Array(5);
-            for (var ii = 0; ii < evals?.length; ii++) {
-                switch (evals[ii]) {
-                    case "absent":
+            for (var ii = 0; ii < ls.length; ii++){
+                switch (evals[i][ii]){
+                    case 'absent':
+                        missingLetters.push(ls[ii]);
                         break;
-                    case "present":
-                        aw[ii] = [ii, this.boardState[i][ii]];
+                    case 'present':
+                        aw[ii] = [ii, bs[i][ii]];
                         awTest = true;
                         break;
                     default:
-                        ex[ii] = [ii, this.boardState[i][ii]];
+                        ex[ii] = [ii, bs[i][ii]];
                         exTest = true;
                 }
             }
             aws.push(aw);
             exs.push(ex);
-        }
-        for (var i = this.boardState.length - 1; i >= 0; i--) {
-            var evals = this.evaluations[i];
-            if (!evals) {
-                continue;
-            }
             const matchWords = wordList.filter(function (v) {
                 if ([...v].some(vl => {
                     return missingLetters.includes(vl);
@@ -90,12 +91,23 @@ this.wordle.bundle.GameApp.prototype.evaluateRow = (function () {
             });
             var valEle = document.getElementById(`row${i}Totals`);
             valEle.innerText = `${matchWords.length} / ${wordList.length}`;
-            break;
         }
+    }
+}
+
+this.wordle.bundle.GameApp.prototype.evaluateRow = (function () {
+    var cached_function = this.wordle.bundle.GameApp.prototype.evaluateRow;
+
+    return function () {
+        var result = cached_function.apply(this, arguments);
+
+        processRows();
 
         return result;
     };
 })();
+
+window.addEventListener('resize', resize);
 
 (async function main() {
     await solve();
