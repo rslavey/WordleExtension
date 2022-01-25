@@ -1,6 +1,10 @@
 {
     "manifest_version": 3,
     "name": "Wordle Stats",
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": false
+    },
     "icons": {
         "128": "square.png"
     },
@@ -21,10 +25,15 @@
     "host_permissions": [
         "https://www.powerlanguage.co.uk/wordle/"
     ],
+    "permissions": [
+        "storage"
+    ],
     "web_accessible_resources": [
         {
             "resources": [
-                "code.js"
+                "options.js",
+                "code.js",
+                "options.html"
             ],
             "matches": [
                 "https://www.powerlanguage.co.uk/*"
