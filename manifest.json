@@ -9,7 +9,7 @@
         "128": "square.png"
     },
     "description": "See how many words are left to guess from.",
-    "version": "0.0.0.1",
+    "version": "0.0.0.2",
     "content_scripts": [
         {
             "matches": [
