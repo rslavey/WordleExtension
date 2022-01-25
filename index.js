@@ -61,22 +61,25 @@ function processRows() {
             var ls = [...bs[i]];
             var aw = new Array(5);
             var ex = new Array(5);
+            var lml = []
             for (var ii = 0; ii < ls.length; ii++) {
                 switch (evals[i][ii]) {
-                    case 'absent':
-                        missingLetters.push(ls[ii]);
+                    case 'correct':
+                        ex[ii] = [ii, bs[i][ii]];
+                        exTest = true;
                         break;
                     case 'present':
                         aw[ii] = [ii, bs[i][ii]];
                         awTest = true;
                         break;
                     default:
-                        ex[ii] = [ii, bs[i][ii]];
-                        exTest = true;
+                        lml.push(ls[ii]);
                 }
             }
             aws.push(aw);
             exs.push(ex);
+            missingLetters = missingLetters.concat(lml.filter(x => !aws.some(xx => {return xx.some(xxx => xxx[1] == x)})).filter(x => !exs.some(xx => {return xx.some(xxx => xxx[1] == x)})));
+            console.log(missingLetters);
             const matchWords = wordList.filter(function (v) {
                 if ([...v].some(vl => {
                     return missingLetters.includes(vl);
@@ -100,7 +103,10 @@ function processRows() {
             }
             var valEle = document.getElementById(`row${i}Totals`);
             if (valEle){
-                valEle.innerText = `${(bs[i] == gs.solution ? 0 : matchWords.length)} ${(window.WordleStats.showTotals ? ('/' + wordList.length) : '')}`;
+                var pct = matchWords.length / wordList.length;
+                var pctText = `${((1 - (bs[i] == gs.solution ? 0 : Math.round((pct + Number.EPSILON) * 10000) / 10000)) * 100).toFixed(3)}`;
+                var text = `${(window.WordleStats.showTotals ? `${(bs[i] == gs.solution ? 0 : matchWords.length)}` : `${pctText}%`)}`;
+                valEle.innerText = text;
             }
         }
     }
