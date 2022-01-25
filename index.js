@@ -100,7 +100,7 @@ function processRows() {
             }
             var valEle = document.getElementById(`row${i}Totals`);
             if (valEle){
-                valEle.innerText = `${matchWords.length} ${(window.WordleStats.showTotals ? ('/' + wordList.length) : '')}`;
+                valEle.innerText = `${(bs[i] == gs.solution ? 0 : matchWords.length)} ${(window.WordleStats.showTotals ? ('/' + wordList.length) : '')}`;
             }
         }
     }
