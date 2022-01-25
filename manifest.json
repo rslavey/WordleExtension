@@ -8,7 +8,7 @@
     "icons": {
         "128": "square.png"
     },
-    "description": "See how many words are left to guess from.",
+    "description": "Hints, word counts, extra features for Wordle",
     "version": "0.0.0.2",
     "content_scripts": [
         {
