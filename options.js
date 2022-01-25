@@ -15,7 +15,7 @@ function save_options() {
 
 function restore_options() {
     chrome.storage.sync.get({
-        showTotals: true,
+        showTotals: false,
         consoleWords: false
     }, function (items) {
         document.getElementById('showtotals').checked = items.showTotals;

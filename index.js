@@ -1,7 +1,7 @@
 window.WordleStats = {};
 async function injectScript() {
     chrome.storage.sync.get({
-        showTotals: true,
+        showTotals: false,
         consoleWords: false
     }, function (items) {
         window.WordleStats.showTotals = items.showTotals;
