@@ -50,15 +50,15 @@ function processRows(reProcess) {
     var awTest = false;
     var exTest = false;
     for (var i = 0; i < bs.length; i++){
+        var lml = []
         if (bs[i] != ''){
-            console.log(bs[i]);
             var ls = [...bs[i]];
             var aw = new Array(5);
             var ex = new Array(5);
             for (var ii = 0; ii < ls.length; ii++){
                 switch (evals[i][ii]){
                     case 'absent':
-                        missingLetters.push(ls[ii]);
+                        lml.push(ls[ii]);
                         break;
                     case 'present':
                         aw[ii] = [ii, bs[i][ii]];
@@ -79,7 +79,7 @@ function processRows(reProcess) {
                 }
                 var awm = aws.every(aw => {
                     return aw.every(w => {
-                        return v.indexOf(w[1], w[0]) != w[0] && v.indexOf(w[1]) > 0;
+                        return v.indexOf(w[1], w[0]) != w[0] && v.indexOf(w[1]) >= 0;
                     });
                 });
                 var exm = exs.every(ex => {
@@ -89,8 +89,10 @@ function processRows(reProcess) {
                 });
                 return awTest && exTest ? awm && exm : awTest ? awm : exTest ? exm : true;
             });
+            //console.log(matchWords);
             var valEle = document.getElementById(`row${i}Totals`);
             valEle.innerText = `${matchWords.length} / ${wordList.length}`;
+            missingLetters = missingLetters.concat(lml);
         }
     }
 }
