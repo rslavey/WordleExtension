@@ -82,7 +82,7 @@ this.wordle.bundle.GameApp.prototype.evaluateRow = (function () {
                     });
                 });
                 var exm = exs.every(ex => {
-                    ex.every(w => {
+                    return ex.every(w => {
                         return v.indexOf(w[1], w[0]) == w[0];
                     });
                 });
