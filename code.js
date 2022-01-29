@@ -46,6 +46,78 @@ function resize() {
     }
 }
 
+function drawSquare(ctx, startx, starty, width, fillColor, strokeColor) {
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(startx, starty, width, width);
+    ctx.fillStyle = strokeColor;
+    ctx.strokeRect(startx, starty, width, width);
+}
+
+function drawResults(sqSize) {
+
+}
+
+function social(sqWidth = 100) {
+    var canv = document.createElement('canvas');
+    canv.id = 'WordleStatsSocialCanvas';
+    canv.setAttribute('style', 'position:absolute;top:0px;left:0px;');
+    var gameNum = Math.round(((new Date().setHours(0, 0, 0, 0)) - (new Date(2021, 5, 19, 0, 0, 0, 0))) / 864e5);
+    //var sqWidth = 100;
+    var gapSize = 5;
+    var textHeight = Math.max(Math.floor(sqWidth / 3), 12);
+    var strokeColor = '#101010';
+    var gs = JSON.parse(localStorage.gameState);
+    var evals = gs.evaluations;
+    var isHardMode = gs.hardMode;
+    var gameLength = evals.filter(x => x).length;
+    var isCBMode = localStorage.colorBlindTheme == 'true' ? true : false;
+    var isDM = localStorage.darkTheme == 'true' ? true : false;
+    canv.width = ((sqWidth + gapSize) * 6) + gapSize;
+    canv.height = ((sqWidth + gapSize) * 6) + gapSize + textHeight;
+
+    document.body.appendChild(canv);
+    var canvas = document.getElementById('WordleStatsSocialCanvas');
+    if (canvas.getContext) {
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = isDM ? '#383838' : '#ffffff';
+        ctx.fillRect(0, 0, ((sqWidth + gapSize) * 6) + gapSize, ((sqWidth + gapSize) * 6) + gapSize + textHeight);
+        var gt = `Wordle ${gameNum} ${gameLength}/6${(isHardMode ? '*' : '')}`;
+        ctx.fillStyle = !isDM ? '#383838' : '#ffffff';
+        ctx.font = `${textHeight}px Arial`;
+        ctx.fillText(gt, gapSize + (sqWidth / 2), textHeight + gapSize);
+
+
+        for (var i = 0; i < 6; i++) {
+            for (var ii = 0; evals[i] && ii < 5; ii++) {
+                var sqColor = isDM ? '#101010' : '#787c7e';
+                switch (evals[i][ii]) {
+                    case 'present':
+                        sqColor = isCBMode ? '#0078d7' : '#fff100';
+                        break;
+                    case 'correct':
+                        sqColor = isCBMode ? '#f7630c' : '#16c60c';
+                        break;
+                    default:
+                        sqColor = isDM ? '#383838' : '#ffffff';
+                }
+                drawSquare(ctx, ((sqWidth + gapSize) * ii) + gapSize + (sqWidth / 2), ((sqWidth + gapSize) * i) + gapSize + (textHeight + (gapSize * 2)), sqWidth, sqColor, strokeColor);
+            }
+        }
+
+        canvas.toBlob(function (blob) {
+            const ii = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([ii]);
+        });
+
+        canv.addEventListener('click', function () {
+            for (var i = 1; evals[i - 1] && i <= evals.length; i++) {
+                gt += `\nRow ${i}: ${evals[i - 1].filter(x => x == 'correct').length} correct, ${evals[i - 1].filter(x => x == 'present').length} present, ${evals[i - 1].filter(x => x == 'absent').length} absent.`;
+            }
+            navigator.clipboard.writeText(`${gt}`).then(function () {
+            }, false);
+        });
+    }
+}
 
 this.wordle.bundle.GameTile.prototype._render = (function (e) {
     var cached_function = this.wordle.bundle.GameTile.prototype._render;
@@ -57,6 +129,16 @@ this.wordle.bundle.GameTile.prototype._render = (function (e) {
         return result;
     };
 })();
+
+this.wordle.bundle.GameApp.prototype.showStatsModal = (function (e) {
+    var cached_function = this.wordle.bundle.GameApp.prototype.showStatsModal;
+    return function () {
+        var result = cached_function.apply(this, arguments);
+        social();
+        return result;
+    };
+})();
+
 
 function processRows() {
     var gs = JSON.parse(localStorage.gameState);
@@ -92,7 +174,6 @@ function processRows() {
             aws.push(aw);
             exs.push(ex);
             missingLetters = missingLetters.concat(lml.filter(x => !aws.some(xx => { return xx.some(xxx => xxx[1] == x) })).filter(x => !exs.some(xx => { return xx.some(xxx => xxx[1] == x) })));
-            console.log(missingLetters);
             const matchWords = wordList.filter(function (v) {
                 if ([...v].some(vl => {
                     return missingLetters.includes(vl);
